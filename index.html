@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#6750A4">
+<meta name="description" content="记一笔 · 以周为周期的个人收支记账工具，支持分类统计、预算与账单导入">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="记一笔">
+<title>记一笔 · 收支记账</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+
+<div id="app">
+  <header class="appbar">
+    <button class="iconbtn left" id="prevWeek" aria-label="上一周">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="title" id="weekPick">
+      <span id="weekLabel">本周</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <button class="iconbtn right" id="nextWeek" aria-label="下一周">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </header>
+
+  <main id="main"></main>
+
+  <button class="fab" id="fab" aria-label="记一笔">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <nav class="tabbar" id="tabbar"></nav>
+</div>
+
+<!-- ===================== 记账面板 ===================== -->
+<div class="mask" id="mask"></div>
+
+<section class="sheet" id="sheet" aria-hidden="true">
+  <div class="grip"></div>
+
+  <div class="seg" id="typeSeg">
+    <button data-type="expense">支出</button>
+    <button data-type="income">收入</button>
+  </div>
+
+  <div class="cats" id="cats"></div>
+
+  <div class="amount-row expense" id="amountRow">
+    <span class="cur">¥</span>
+    <span class="val num" id="amountText"><span class="placeholder">0.00</span></span>
+  </div>
+
+  <div class="meta">
+    <input type="date" id="dateInput">
+    <input type="text" id="noteInput" placeholder="备注（可选）" maxlength="40">
+    <select id="acctInput"></select>
+  </div>
+
+  <div class="keypad" id="keypad">
+    <button data-k="1">1</button>
+    <button data-k="2">2</button>
+    <button data-k="3">3</button>
+    <button class="fn del" data-k="del" aria-label="退格">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+    </button>
+    <button data-k="4">4</button>
+    <button data-k="5">5</button>
+    <button data-k="6">6</button>
+    <button class="fn" data-k="clr">清空</button>
+    <button data-k="7">7</button>
+    <button data-k="8">8</button>
+    <button data-k="9">9</button>
+    <button class="save" id="saveBtn">保存</button>
+    <button data-k=".">.</button>
+    <button data-k="0">0</button>
+    <button data-k="00">00</button>
+  </div>
+
+  <div class="sheet-actions" id="sheetActions" style="display:none">
+    <button id="cancelBtn">取消</button>
+    <button class="del" id="deleteBtn">删除这笔</button>
+  </div>
+</section>
+
+<!-- ===================== 通用对话框 ===================== -->
+<div class="dialog-mask" id="dialogMask">
+  <div class="dialog" id="dialog"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="./app.js"></script>
+</body>
+</html>

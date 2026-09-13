@@ -1,0 +1,6 @@
+{
+  "versionCode": 25000,
+  "versionName": "2.5.0",
+  "downloadUrl": "https://github.com/lyl-creator/jiyibi/releases/latest/download/app-release.apk",
+  "changelog": "新增银行卡短信自动记账；更新源迁移至 GitHub Releases"
+}

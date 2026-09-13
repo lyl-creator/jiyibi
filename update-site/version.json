@@ -1,0 +1,6 @@
+{
+  "versionCode": 23000,
+  "versionName": "2.3.0",
+  "downloadUrl": "https://weekly-ledger.app.workbuddy.host/app-release.apk",
+  "changelog": "新增界面毛玻璃模糊效果；记账面板增加「取消/确定」按钮；金额输入改用系统输入法；修复更新检查"
+}

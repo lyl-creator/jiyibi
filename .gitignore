@@ -1,0 +1,39 @@
+# ---- Android 构建产物 ----
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.iml
+.cxx/
+
+# ---- 构建产物与二进制 ----
+# APK 通过 GitHub Releases 分发，不纳入版本库
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# ---- 日志与临时文件 ----
+*.log
+build*.log
+clean.log
+*-test.txt
+*-report.txt
+*.tmp
+*.bak
+
+# ---- 系统与编辑器 ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ---- 内部工具目录 ----
+.workbuddy/
+.wbapp_*
+.genie
+apk-info.txt
