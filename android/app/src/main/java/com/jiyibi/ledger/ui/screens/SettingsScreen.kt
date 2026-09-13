@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Code
@@ -82,6 +86,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.jiyibi.ledger.data.BillParser
 import com.jiyibi.ledger.data.DEFAULT_UPDATE_URL
+import com.jiyibi.ledger.data.NotifyLog
 import com.jiyibi.ledger.ui.LedgerViewModel
 import com.jiyibi.ledger.ui.theme.ThemeMode
 import com.jiyibi.ledger.ui.theme.brandPalettes
@@ -559,6 +564,7 @@ private fun MonitorSection(vm: LedgerViewModel) {
     var accessGranted by remember { mutableStateOf(vm.isNotificationAccessGranted()) }
     var smsGranted by remember { mutableStateOf(vm.isSmsPermissionGranted()) }
     var refreshTrigger by remember { mutableStateOf(0) }
+    var showNotifyLog by remember { mutableStateOf(false) }
 
     // 短信权限申请
     val smsPermissionLauncher = rememberLauncherForActivityResult(
@@ -795,15 +801,141 @@ private fun MonitorSection(vm: LedgerViewModel) {
         }
         Divider()
 
+        // 通知诊断：核对每条通知是否被识别、未记账的具体原因
+        val notifyLogCount = remember(refreshTrigger) { NotifyLog.list(context).size }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .clickable { showNotifyLog = true }
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Outlined.BugReport,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "通知诊断",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "最近 $notifyLogCount 条通知的识别结果，可定位未记账原因",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Divider()
+
         // 覆盖范围说明
         Text(
             text = "支持微信、支付宝、云闪付及各类手机银行 App 的付款 / 收款通知。" +
                     "未在名单内的银行 App，将按应用名称自动识别（名称含「银行」「支付」「钱包」等）。" +
-                    "识别到的记录会立即写入并刷新界面，可在此核对。",
+                    "识别到的记录会立即写入并刷新界面，可在此核对。若某笔交易没记上，" +
+                    "可点开「通知诊断」查看该通知的原文与原因。",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         )
+    }
+
+    if (showNotifyLog) {
+        NotifyLogDialog(onDismiss = { showNotifyLog = false })
+    }
+}
+
+/* ---------------- 通知诊断对话框 ---------------- */
+
+@Composable
+private fun NotifyLogDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    var entries by remember { mutableStateOf(NotifyLog.list(context)) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("通知诊断") },
+        text = {
+            if (entries.isEmpty()) {
+                Text(
+                    text = "暂无记录。\n\n" +
+                            "收到微信、支付宝或银行 App 的支付 / 收款通知后，" +
+                            "这里会显示该通知的原文与识别结果。\n\n" +
+                            "若长时间为空，请确认「通知使用权」已授权、且「自动记账」已开启。",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                LazyColumn(modifier = Modifier.heightIn(max = 420.dp)) {
+                    items(entries) { entry -> NotifyLogRow(entry) }
+                }
+            }
+        },
+        confirmButton = {
+            if (entries.isNotEmpty()) {
+                TextButton(onClick = {
+                    NotifyLog.clear(context)
+                    entries = emptyList()
+                }) {
+                    Text("清空")
+                }
+            }
+            TextButton(onClick = onDismiss) {
+                Text("关闭")
+            }
+        }
+    )
+}
+
+@Composable
+private fun NotifyLogRow(entry: NotifyLog.Entry) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = NotifyLog.formatTime(entry.time),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = entry.app,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = entry.result,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (entry.ok) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.error
+        )
+        val origin = listOf(entry.title, entry.text)
+            .filter { it.isNotBlank() }
+            .joinToString(" | ")
+        if (origin.isNotEmpty()) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = origin,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        HorizontalDivider()
     }
 }
 

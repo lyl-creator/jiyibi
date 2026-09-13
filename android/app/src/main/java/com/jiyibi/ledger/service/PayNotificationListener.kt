@@ -5,6 +5,7 @@ import android.content.Context
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.jiyibi.ledger.data.LedgerEvents
+import com.jiyibi.ledger.data.NotifyLog
 import com.jiyibi.ledger.data.Store
 import com.jiyibi.ledger.util.Money
 import java.util.concurrent.ConcurrentHashMap
@@ -32,11 +33,18 @@ class PayNotificationListener : NotificationListenerService() {
     private val amountDedup = ConcurrentHashMap<String, Long>()
 
     override fun onListenerConnected() {
-        // 服务已绑定，可在此做初始化
+        // 记录连接状态，便于用户在「通知诊断」中确认服务是否真正生效
+        NotifyLog.add(
+            applicationContext, "系统", "通知监听服务", "",
+            "已连接：通知使用权生效，开始接收支付 / 银行类通知", true
+        )
     }
 
     override fun onListenerDisconnected() {
-        // 系统解绑（用户撤销授权或进程被杀）
+        NotifyLog.add(
+            applicationContext, "系统", "通知监听服务", "",
+            "已断开：请检查「通知使用权」是否被系统回收", false
+        )
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
@@ -55,25 +63,68 @@ class PayNotificationListener : NotificationListenerService() {
 
         // 读取磁盘与解析均放在工作线程，避免阻塞通知回调主线程
         executor.execute {
-            val data = store.load()
-            if (!data.monitorEnabled) return@execute
+            val label = appLabel(pkg)
+            val source = NotifyParser.sourceName(pkg, label)
 
-            val parsed = NotifyParser.parse(pkg, title, text, appLabel(pkg)) ?: return@execute
+            val data = store.load()
+            if (!data.monitorEnabled) {
+                logIfRelevant(pkg, label, source, title, text, "未记账：自动记账开关未开启")
+                return@execute
+            }
+
+            val analysis = NotifyParser.analyze(pkg, title, text, label)
+            val parsed = analysis.parsed
+            if (parsed == null) {
+                logIfRelevant(pkg, label, source, title, text, "未记账：${analysis.reason}")
+                return@execute
+            }
 
             // 二级去重：同一应用、同方向、同金额在短时间内只记一笔
             val amountKey = "$pkg|${parsed.record.type}|${parsed.record.amount}"
             val ts = System.currentTimeMillis()
-            if (amountDedup[amountKey]?.let { it > ts } == true) return@execute
+            if (amountDedup[amountKey]?.let { it > ts } == true) {
+                NotifyLog.add(
+                    applicationContext, source, title, text,
+                    "未记账：与 40 秒内的同额同向记录重复", false
+                )
+                return@execute
+            }
             amountDedup[amountKey] = ts + AMOUNT_DEDUP_TTL
             amountDedup.entries.removeIf { it.value < ts }
 
             if (saveRecord(parsed)) {
                 val dir = if (parsed.record.isIncome) "收入" else "支出"
+                NotifyLog.add(
+                    applicationContext, source, title, text,
+                    "已记账：$dir ¥${Money.format(parsed.record.amount)}", true
+                )
                 LedgerEvents.notifyChanged(
                     "已自动记账：${parsed.sourceLabel} $dir ¥${Money.format(parsed.record.amount)}"
                 )
+            } else {
+                NotifyLog.add(
+                    applicationContext, source, title, text,
+                    "未记账：写入账本失败", false
+                )
             }
         }
+    }
+
+    /**
+     * 仅对「可能与记账有关」的通知留痕：来自支付 / 银行类应用，或正文含交易特征。
+     * 避免把聊天、新闻等无关通知灌进诊断日志。
+     */
+    private fun logIfRelevant(
+        pkg: String,
+        label: String?,
+        source: String,
+        title: String?,
+        text: String?,
+        reason: String
+    ) {
+        val full = "${title.orEmpty()} ${text.orEmpty()}"
+        if (!NotifyParser.isPaymentApp(pkg, label) && !NotifyParser.looksLikeTransaction(full)) return
+        NotifyLog.add(applicationContext, source, title, text, reason, false)
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {

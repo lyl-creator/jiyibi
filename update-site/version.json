@@ -1,6 +1,6 @@
 {
-  "versionCode": 28000,
-  "versionName": "2.8.0",
+  "versionCode": 28001,
+  "versionName": "2.8.1",
   "downloadUrl": "https://github.com/lyl-creator/jiyibi/releases/latest/download/app-release.apk",
-  "changelog": "自动记账扩展至微信/支付宝/云闪付及各大银行 App 交易通知；收到通知或短信后界面自动刷新；明细列表改为时间倒序（最新记录在最上方）；更新源统一为 GitHub"
+  "changelog": "修复几角钱小额交易的通知未被记账：不再因通知含「余额」「可用额度」而整条丢弃，金额提取可正确区分交易额与账户余额；修复「向XX转账」金额被误判为卡号导致漏记；新增「通知诊断」，可查看每条通知的识别结果与未记账原因"
 }
