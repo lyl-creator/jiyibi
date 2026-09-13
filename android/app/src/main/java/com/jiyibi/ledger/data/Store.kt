@@ -32,7 +32,9 @@ class Store(context: Context) {
                 updateUrl = root.optString(
                     "updateUrl",
                     "https://github.com/lyl-creator/jiyibi/releases/latest/download/version.json"
-                )
+                ),
+                themeMode = root.optString("themeMode", "system"),
+                themeColor = root.optString("themeColor", "purple")
             )
         } catch (e: Exception) {
             LedgerData()
@@ -54,6 +56,8 @@ class Store(context: Context) {
                 put("notifyHour", data.notifyHour)
                 put("notifyMinute", data.notifyMinute)
                 put("updateUrl", data.updateUrl)
+                put("themeMode", data.themeMode)
+                put("themeColor", data.themeColor)
                 put("savedAt", System.currentTimeMillis())
             }
             file.writeText(root.toString(), Charsets.UTF_8)

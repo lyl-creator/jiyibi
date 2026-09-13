@@ -185,6 +185,16 @@ class LedgerViewModel(app: Application) : AndroidViewModel(app) {
         data = data.copy(updateUrl = url.trim()); persist()
     }
 
+    /* ---------------- 外观 ---------------- */
+
+    fun setThemeMode(mode: String) {
+        data = data.copy(themeMode = mode); persist()
+    }
+
+    fun setThemeColor(colorId: String) {
+        data = data.copy(themeColor = colorId); persist()
+    }
+
     /* ---------------- 导入 ---------------- */
 
     fun importRecords(records: List<Record>) {

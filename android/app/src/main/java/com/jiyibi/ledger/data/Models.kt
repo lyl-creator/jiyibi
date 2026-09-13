@@ -69,7 +69,11 @@ data class LedgerData(
     val notifyMinute: Int = 0,
     /** 软件更新检查地址（version.json 的 URL） */
     val updateUrl: String =
-        "https://github.com/lyl-creator/jiyibi/releases/latest/download/version.json"
+        "https://github.com/lyl-creator/jiyibi/releases/latest/download/version.json",
+    /** 主题模式：system 跟随系统 / light 白天 / dark 夜间 */
+    val themeMode: String = "system",
+    /** 主题色标识，对应 ui.theme.brandPalettes 中的 id */
+    val themeColor: String = "purple"
 )
 
 /** 某一周的汇总 */

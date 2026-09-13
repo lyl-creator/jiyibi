@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
@@ -99,6 +100,9 @@ fun EntrySheet(
     var note by remember { mutableStateOf(initial?.note ?: "") }
     var date by remember { mutableStateOf(initial?.date ?: DateUtil.today()) }
     var datePickerOpen by remember { mutableStateOf(false) }
+
+    // 记账时刻：编辑时沿用原记录时间，新建时取进入面板的时刻
+    val recordTime = remember { initial?.createdAt ?: System.currentTimeMillis() }
 
     // 类型变化时若分类不在当前类型列表内则重置为第一项
     val currentList = Categories.of(type)
@@ -208,13 +212,27 @@ fun EntrySheet(
 
             Spacer(Modifier.height(10.dp))
 
-            // 日期 + 账户
+            // 日期 + 时刻 + 账户
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = { datePickerOpen = true }) {
                     Icon(Icons.Outlined.CalendarMonth, contentDescription = null,
                         modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(4.dp))
                     Text(DateUtil.dayLabel(date).split(" · ").last())
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Outlined.Schedule,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = DateUtil.timeLabel(recordTime),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 Spacer(Modifier.weight(1f))
                 AccountPicker(
@@ -263,7 +281,7 @@ fun EntrySheet(
                             date = date,
                             note = note.trim(),
                             account = account,
-                            createdAt = initial?.createdAt ?: System.currentTimeMillis()
+                            createdAt = if (initial != null) initial.createdAt else recordTime
                         )
                         vm.upsert(rec)
                         vm.toast(if (initial == null) "已添加" else "已更新")

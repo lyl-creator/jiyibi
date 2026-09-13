@@ -52,6 +52,16 @@ object DateUtil {
         return "${p[1].toInt()}/${p[2].toInt()}"
     }
 
+    /** 时间戳 → "14:30"，用于展示记账时刻 */
+    fun timeLabel(millis: Long): String {
+        val c = Calendar.getInstance()
+        c.timeInMillis = millis
+        return String.format(
+            Locale.US, "%02d:%02d",
+            c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE)
+        )
+    }
+
     /** "9/7–9/13"；跨年时补上年份 */
     fun weekRangeLabel(monday: String): String {
         val sunday = shiftDays(monday, 6)

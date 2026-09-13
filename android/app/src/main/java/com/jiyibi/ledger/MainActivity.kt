@@ -28,7 +28,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            LedgerTheme {
+            LedgerTheme(
+                themeMode = vm.data.themeMode,
+                themeColor = vm.data.themeColor
+            ) {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()

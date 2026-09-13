@@ -18,13 +18,31 @@ data class MoneyColors(val out: Color, val income: Color)
 
 val LocalMoneyColors = staticCompositionLocalOf { MoneyColors(MoneyOutLight, MoneyInLight) }
 
-private val LightScheme = lightColorScheme(
-    primary = Primary,
-    onPrimary = OnPrimary,
-    primaryContainer = PrimaryContainer,
-    onPrimaryContainer = OnPrimaryContainer,
-    secondaryContainer = SecondaryContainer,
-    onSecondaryContainer = OnSecondaryContainer,
+/* ---------------- 主题模式 ---------------- */
+
+object ThemeMode {
+    const val SYSTEM = "system"
+    const val LIGHT = "light"
+    const val DARK = "dark"
+
+    val all = listOf(SYSTEM, LIGHT, DARK)
+
+    fun label(mode: String): String = when (mode) {
+        LIGHT -> "白天"
+        DARK -> "夜间"
+        else -> "跟随系统"
+    }
+}
+
+/* ---------------- 配色构建 ---------------- */
+
+private fun lightSchemeOf(brand: BrandTones) = lightColorScheme(
+    primary = brand.primary,
+    onPrimary = brand.onPrimary,
+    primaryContainer = brand.primaryContainer,
+    onPrimaryContainer = brand.onPrimaryContainer,
+    secondaryContainer = brand.secondaryContainer,
+    onSecondaryContainer = brand.onSecondaryContainer,
     background = Surface,
     onBackground = OnSurface,
     surface = Surface,
@@ -43,13 +61,13 @@ private val LightScheme = lightColorScheme(
     inverseOnSurface = InverseOnSurface
 )
 
-private val DarkScheme = darkColorScheme(
-    primary = DarkPrimary,
-    onPrimary = DarkOnPrimary,
-    primaryContainer = DarkPrimaryContainer,
-    onPrimaryContainer = DarkOnPrimaryContainer,
-    secondaryContainer = DarkSecondaryContainer,
-    onSecondaryContainer = DarkOnSecondaryContainer,
+private fun darkSchemeOf(brand: BrandTones) = darkColorScheme(
+    primary = brand.primary,
+    onPrimary = brand.onPrimary,
+    primaryContainer = brand.primaryContainer,
+    onPrimaryContainer = brand.onPrimaryContainer,
+    secondaryContainer = brand.secondaryContainer,
+    onSecondaryContainer = brand.onSecondaryContainer,
     background = DarkSurface,
     onBackground = DarkOnSurface,
     surface = DarkSurface,
@@ -83,14 +101,31 @@ private val AppTypography = androidx.compose.material3.Typography().let { base -
     )
 }
 
+/**
+ * 应用主题。
+ *
+ * @param themeMode 主题模式：system / light / dark
+ * @param themeColor 主题色标识，对应 [brandPalettes] 中的 id
+ */
 @Composable
-fun LedgerTheme(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
+fun LedgerTheme(
+    themeMode: String = ThemeMode.SYSTEM,
+    themeColor: String = "purple",
+    content: @Composable () -> Unit
+) {
+    val dark = when (themeMode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        else -> isSystemInDarkTheme()
+    }
+
+    val palette = findBrandPalette(themeColor)
+    val scheme = if (dark) darkSchemeOf(palette.dark) else lightSchemeOf(palette.light)
     val money = if (dark) MoneyColors(MoneyOutDark, MoneyInDark)
     else MoneyColors(MoneyOutLight, MoneyInLight)
 
     MaterialTheme(
-        colorScheme = if (dark) DarkScheme else LightScheme,
+        colorScheme = scheme,
         typography = AppTypography
     ) {
         CompositionLocalProvider(LocalMoneyColors provides money, content = content)

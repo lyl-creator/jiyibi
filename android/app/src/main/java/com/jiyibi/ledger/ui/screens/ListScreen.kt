@@ -327,6 +327,7 @@ private fun RecordRow(
                 color = MaterialTheme.colorScheme.onSurface
             )
             val sub = listOfNotNull(
+                DateUtil.timeLabel(record.createdAt),
                 record.account.takeIf { it.isNotEmpty() },
                 record.note.takeIf { it.isNotEmpty() }
             ).joinToString(" · ")
