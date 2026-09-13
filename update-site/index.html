@@ -5,33 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>记一笔 - 更新服务</title>
   <style>
-    body { font-family: system-ui, sans-serif; padding: 40px; text-align: center; background: #f5f5f5; }
-    .card { background: white; border-radius: 16px; padding: 32px; max-width: 480px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h1 { color: #6750A4; margin-bottom: 8px; }
-    .version { color: #666; margin-bottom: 24px; }
-    a { color: #6750A4; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .links { margin-top: 24px; }
-    .links a { display: inline-block; margin: 8px 16px; padding: 12px 24px; background: #EADDFF; border-radius: 24px; }
+    body { font-family: system-ui, sans-serif; padding: 40px; text-align: center; background: #f5f5f5; margin: 0; }
+    .card { background: white; border-radius: 16px; padding: 32px; max-width: 480px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    h1 { color: #6750A4; margin: 0 0 8px; }
+    .sub { color: #666; margin-bottom: 24px; }
+    p { color: #444; line-height: 1.6; }
+    a.btn { display: block; margin: 20px 0 8px; padding: 14px 24px; background: #6750A4; color: #fff; border-radius: 24px; text-decoration: none; font-weight: 500; }
+    a.btn:hover { background: #52428a; }
+    a.link { color: #6750A4; text-decoration: none; font-size: 14px; }
+    a.link:hover { text-decoration: underline; }
+    .note { font-size: 13px; color: #888; margin-top: 24px; }
+    code { background: #f0edf7; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>记一笔</h1>
-    <div class="version">Android 应用更新服务</div>
-    <p>此站点提供「记一笔」的版本检查与 APK 下载。</p>
-    <div class="links">
-      <a href="/app-release.apk">下载 APK v2.3.0</a>
-    </div>
+    <div class="sub">Android 应用更新服务</div>
+
+    <p>应用已迁移至 GitHub 发布，本站点仅作为旧版本的更新中转。</p>
+
+    <a class="btn" href="https://github.com/lyl-creator/jiyibi/releases/latest/download/app-release.apk">下载 APK v2.5.0</a>
+    <a class="link" href="https://github.com/lyl-creator/jiyibi/releases">查看全部版本与更新日志</a>
+
+    <p class="note">
+      版本清单：<code>/version.json</code><br>
+      APK 由 GitHub Releases 提供
+    </p>
   </div>
 
-  <!-- 应用内更新读取此 JSON -->
+  <!-- 应用内更新读取此 JSON（旧版本默认更新源） -->
   <script type="application/json" id="version-info">
 {
-  "versionCode": 23000,
-  "versionName": "2.3.0",
-  "downloadUrl": "https://weekly-ledger.app.workbuddy.host/app-release.apk",
-  "changelog": "新增界面毛玻璃模糊效果；记账面板增加「取消/确定」按钮；金额输入改用系统输入法；修复更新检查"
+  "versionCode": 25000,
+  "versionName": "2.5.0",
+  "downloadUrl": "https://github.com/lyl-creator/jiyibi/releases/latest/download/app-release.apk",
+  "changelog": "新增银行卡短信自动记账；更新源已迁移至 GitHub Releases，本次安装后后续更新将从 GitHub 获取"
 }
   </script>
 </body>
