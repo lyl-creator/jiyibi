@@ -24,11 +24,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PlaylistAdd
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Sms
@@ -815,6 +818,73 @@ private fun AboutSection(vm: LedgerViewModel) {
         }
         Divider()
 
+        // 作者
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Outlined.Person,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "作者",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = AUTHOR_NAME,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        Divider()
+
+        // GitHub 仓库
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .clickable { openUrl(context, AUTHOR_GITHUB) }
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Outlined.Code,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "GitHub 仓库",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = AUTHOR_REPO,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            Icon(
+                Icons.Outlined.OpenInNew,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Divider()
+
         // 更新源地址
         Column(
             modifier = Modifier
@@ -937,6 +1007,30 @@ private fun AboutSection(vm: LedgerViewModel) {
             }
             Divider()
         }
+    }
+}
+
+/* ---------------- 应用信息 ---------------- */
+
+/** 作者名称 */
+private const val AUTHOR_NAME = "lyl-creator"
+
+/** GitHub 仓库地址 */
+private const val AUTHOR_GITHUB = "https://github.com/lyl-creator/jiyibi"
+
+/** 仓库简称，用于界面展示 */
+private const val AUTHOR_REPO = "lyl-creator/jiyibi"
+
+/** 用系统浏览器打开链接 */
+private fun openUrl(context: android.content.Context, url: String) {
+    try {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        )
+    } catch (e: Exception) {
+        // 设备无可用浏览器时静默忽略
     }
 }
 

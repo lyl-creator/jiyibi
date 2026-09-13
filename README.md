@@ -140,8 +140,8 @@ https://github.com/lyl-creator/jiyibi/releases/latest/download/version.json
 
 ```json
 {
-  "versionCode": 25000,
-  "versionName": "2.5.0",
+  "versionCode": 26000,
+  "versionName": "2.6.0",
   "downloadUrl": "https://github.com/lyl-creator/jiyibi/releases/latest/download/app-release.apk",
   "changelog": "本次更新内容"
 }
