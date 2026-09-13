@@ -30,6 +30,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import com.jiyibi.ledger.data.LedgerEvents
 import com.jiyibi.ledger.data.Record
 import com.jiyibi.ledger.ui.components.EntrySheet
 import com.jiyibi.ledger.ui.screens.ListScreen
@@ -69,6 +71,15 @@ fun AppRoot(vm: LedgerViewModel) {
         vm.message?.let {
             snackbarHostState.showSnackbar(it)
             vm.consumeMessage()
+        }
+    }
+
+    // 通知监听 / 银行短信写入账本后立即刷新界面，无需用户手动操作
+    val ledgerChange by LedgerEvents.change.collectAsState()
+    LaunchedEffect(ledgerChange.revision) {
+        if (ledgerChange.revision > 0L) {
+            vm.reloadFromDisk()
+            if (ledgerChange.reason.isNotEmpty()) vm.toast(ledgerChange.reason)
         }
     }
 

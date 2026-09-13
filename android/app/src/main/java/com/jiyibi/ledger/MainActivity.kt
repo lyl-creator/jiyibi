@@ -43,4 +43,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        // 兜底刷新：进程被杀后重启、或界面曾处于销毁状态时，
+        // 补齐后台期间由通知监听 / 银行短信写入的记录
+        vm.reloadFromDisk()
+    }
 }

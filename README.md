@@ -13,13 +13,17 @@
 - **20 个分类**：12 类支出（餐饮、交通、购物、居家等）+ 8 类收入（工资、奖金、理财等），各带独立配色
 - **金额输入**：调用系统输入法，实时校验（限两位小数、自动去前导零）
 - **账户归属**：微信 / 支付宝 / 银行卡 / 信用卡 / 现金 / 其他
+- **明细排序**：同一天内按记账时间倒序排列，最新记录显示在最上方
 
 ### 预算
 - **周预算**与**月预算**双轨并行，进度条实时反映使用比例，超支变色提示
 
 ### 自动记账
 - **银行卡短信**：解析银行交易短信，自动提取金额、方向、卡号尾号并归类
-- **支付通知**：监听微信 / 支付宝 / 银行 App 的推送通知，自动生成记录
+- **支付通知**：监听微信 / 支付宝 / 云闪付 / 京东金融 / 美团 / 数字人民币及各大银行 App 的推送通知，自动生成记录
+  - 内置 20+ 常用应用白名单，并对未收录的应用按名称特征（银行、信用社、农商、银联、支付、钱包、信用卡等）启发式识别
+  - 金额提取支持四级匹配（货币符号 / 「元」后缀 / 关键词前缀 / 小数兜底），并排除卡号尾号等非金额数字
+- **实时刷新**：后台写入记录后通过进程内事件总线通知界面，返回应用或停留在应用内时数据立即更新，无需手动刷新
 - 两者均支持开关控制，去重机制避免重复记账
 
 ### 统计
@@ -29,6 +33,7 @@
 
 ### 数据
 - 本地 JSON 文件存储，**零上传、零网络依赖**（除检查更新外）
+- 采用「临时文件 + 原子重命名」写入，避免后台自动记账与界面读写并发导致的数据损坏
 - 导入微信 / 支付宝 CSV 账单（自动识别表头、跳过转账与退款）
 - 导出 JSON 备份 / CSV 明细，支持跨设备合并去重
 
@@ -55,7 +60,7 @@
 | 权限 | 用途 |
 |------|------|
 | `RECEIVE_SMS` / `READ_SMS` | 解析银行交易短信实现自动记账（可选，需手动授权） |
-| 通知使用权 | 读取微信 / 支付宝交易通知实现自动记账（可选，需在系统设置授权） |
+| 通知使用权 | 读取微信 / 支付宝 / 银行 App 交易通知实现自动记账（可选，需在系统设置授权） |
 | `POST_NOTIFICATIONS` | 每日昨日收支提醒（Android 13+） |
 | `INTERNET` | 仅用于检查更新与下载新版 APK |
 | `REQUEST_INSTALL_PACKAGES` | 应用内更新时触发安装 |
@@ -75,7 +80,7 @@
 │   │       ├── AndroidManifest.xml
 │   │       ├── java/com/jiyibi/ledger/
 │   │       │   ├── MainActivity.kt
-│   │       │   ├── data/         # 数据模型、分类、存储、账单解析
+│   │       │   ├── data/         # 数据模型、分类、存储、事件总线、账单解析
 │   │       │   ├── util/         # 日期、金额工具
 │   │       │   ├── ui/           # Compose 界面
 │   │       │   │   ├── AppRoot.kt
@@ -95,7 +100,7 @@
 ├── manifest.webmanifest
 ├── sw.js
 ├── icons/                        # 应用图标
-├── update-site/                  # 更新服务页（历史留存）
+├── update-site/                  # 旧版更新中转站（已弃用，仅为 ≤2.7.0 过渡保留）
 ├── version.json                  # 版本清单（随 Release 发布）
 └── tools/                        # 图标生成、冒烟测试脚本
 ```
@@ -133,6 +138,8 @@ gradle assembleRelease
 https://github.com/lyl-creator/jiyibi/releases/latest/download/version.json
 ```
 
+该地址是应用内唯一默认更新源（常量 `DEFAULT_UPDATE_URL`）。历史版本若存有旧的过渡桥地址（`weekly-ledger.app.workbuddy.host`），会在读取配置时自动迁移为上述 GitHub 地址。
+
 发布新版本时，创建 Release 并上传两个附件即可：
 
 - `version.json` —— 版本清单
@@ -142,14 +149,16 @@ https://github.com/lyl-creator/jiyibi/releases/latest/download/version.json
 
 ```json
 {
-  "versionCode": 27000,
-  "versionName": "2.7.0",
+  "versionCode": 28000,
+  "versionName": "2.8.0",
   "downloadUrl": "https://github.com/lyl-creator/jiyibi/releases/latest/download/app-release.apk",
   "changelog": "本次更新内容"
 }
 ```
 
 用户打开「设置 → 关于 → 检查更新」即可获取新版本。
+
+> 过渡站：`update-site/` 曾作为 weekly-ledger 更新源的部署目录，现已弃用。为让存量旧版本（≤2.7.0）仍能收到升级提示，可将该目录留作中转，但其内容仅需保持指向 GitHub Releases 的最新版本号。
 
 ---
 

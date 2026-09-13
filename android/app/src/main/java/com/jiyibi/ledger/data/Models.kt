@@ -3,6 +3,15 @@ package com.jiyibi.ledger.data
 import org.json.JSONObject
 import java.util.UUID
 
+/**
+ * 默认更新源：GitHub Releases 的最新版 version.json。
+ *
+ * 旧版本曾由自建站点 weekly-ledger.app.workbuddy.host 提供中转，该过渡桥已废弃，
+ * [Store] 在加载时会把历史遗留的旧地址自动迁移为本地址。
+ */
+const val DEFAULT_UPDATE_URL: String =
+    "https://github.com/lyl-creator/jiyibi/releases/latest/download/version.json"
+
 /** 一条收支记录。金额以「分」存储。 */
 data class Record(
     val id: String,
@@ -68,8 +77,7 @@ data class LedgerData(
     /** 提醒时间：分钟（0-59） */
     val notifyMinute: Int = 0,
     /** 软件更新检查地址（version.json 的 URL） */
-    val updateUrl: String =
-        "https://github.com/lyl-creator/jiyibi/releases/latest/download/version.json",
+    val updateUrl: String = DEFAULT_UPDATE_URL,
     /** 主题模式：system 跟随系统 / light 白天 / dark 夜间 */
     val themeMode: String = "system",
     /** 主题色标识，对应 ui.theme.brandPalettes 中的 id */

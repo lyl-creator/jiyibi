@@ -81,6 +81,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.jiyibi.ledger.data.BillParser
+import com.jiyibi.ledger.data.DEFAULT_UPDATE_URL
 import com.jiyibi.ledger.ui.LedgerViewModel
 import com.jiyibi.ledger.ui.theme.ThemeMode
 import com.jiyibi.ledger.ui.theme.brandPalettes
@@ -636,7 +637,7 @@ private fun MonitorSection(vm: LedgerViewModel) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = if (vm.data.monitorEnabled) "已开启，监测到交易将自动记录"
+                    text = if (vm.data.monitorEnabled) "已开启，支付宝 / 微信 / 银行 App 交易通知将自动记录"
                     else "关闭",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -786,12 +787,23 @@ private fun MonitorSection(vm: LedgerViewModel) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "今日自动记录 ${vm.todayAutoCount()} 条",
+                    text = "今日自动记录 ${vm.todayAutoCount()} 条 · 新记录已自动刷新",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
+        Divider()
+
+        // 覆盖范围说明
+        Text(
+            text = "支持微信、支付宝、云闪付及各类手机银行 App 的付款 / 收款通知。" +
+                    "未在名单内的银行 App，将按应用名称自动识别（名称含「银行」「支付」「钱包」等）。" +
+                    "识别到的记录会立即写入并刷新界面，可在此核对。",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+        )
     }
 }
 
@@ -1079,6 +1091,14 @@ private fun AboutSection(vm: LedgerViewModel) {
                         vm.toast("更新源已保存")
                     }
                 ) { Text("保存地址") }
+                Spacer(Modifier.width(12.dp))
+                OutlinedButton(
+                    onClick = {
+                        updateUrl = DEFAULT_UPDATE_URL
+                        vm.setUpdateUrl(DEFAULT_UPDATE_URL)
+                        vm.toast("已恢复默认更新源（GitHub）")
+                    }
+                ) { Text("恢复默认") }
                 Spacer(Modifier.width(12.dp))
                 Button(
                     onClick = {

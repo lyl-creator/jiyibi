@@ -244,7 +244,11 @@ private fun DayGroupedList(
 ) {
     val grouped = remember(records) {
         records
-            .sortedByDescending { DateUtil.key(it.date) }
+            // 日期降序；同一天内按记账时刻降序，新发生的排在上面
+            .sortedWith(
+                compareByDescending<Record> { DateUtil.key(it.date) }
+                    .thenByDescending { it.createdAt }
+            )
             .groupBy { it.date }
             .toSortedMap(compareByDescending { DateUtil.key(it) })
     }

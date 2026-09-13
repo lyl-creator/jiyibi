@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
+import com.jiyibi.ledger.data.LedgerEvents
 import com.jiyibi.ledger.data.Store
+import com.jiyibi.ledger.util.Money
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -50,6 +52,12 @@ class SmsReceiver : BroadcastReceiver() {
 
         try {
             store.save(data.copy(records = data.records + parsed.record))
+            // 通知界面立即刷新，无需用户手动点「刷新数据」
+            val dir = if (parsed.record.isIncome) "收入" else "支出"
+            val tail = parsed.cardTail.takeIf { it.isNotEmpty() }?.let { "($it)" }.orEmpty()
+            LedgerEvents.notifyChanged(
+                "短信自动记账：${parsed.bank}$tail $dir ¥${Money.format(parsed.record.amount)}"
+            )
         } catch (e: Exception) {
             // 写入失败不中断广播处理
         }
